@@ -32,18 +32,25 @@ router.get('/checkUserUsingDNS',(req,res)=>{
 router.get('/checkUserIPUsingIPs', (req, res) => {
     let publicIPs = ['105.37.128.108', '105.34.11.64', '162.158.22.204', '10.210.119.101'];
     let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-    if (ip.substr(0, 7) == "::ffff:") {
-        ip = ip.substr(7);
+
+    // If x-forwarded-for has multiple IP addresses, it's a comma-separated string
+    let ips = ip.split(',');
+
+    // Trim whitespace from each IP address
+    ips = ips.map(ip => ip.trim());
+
+    // Check if any of the IPs in the x-forwarded-for header is in publicIPs
+    for(let ip of ips) {
+        if (publicIPs.includes(ip)) {
+            // The IP is in the list of public IPs
+            return res.status(200).json({msg:'User is authenticated',value:true});
+        }
     }
-    console.log(ip)
-    if (publicIPs.includes(ip)) {
-        // The IP is in the list of public IPs
-        res.status(200).json({msg:'User is authenticated',value:true});
-    } else {
-        // The IP is not in the list of public IPs
-        res.status(401).json({msg:'User is unauthenticated',value:false});
-    }
+
+    // No IP address was in the list of public IPs
+    res.status(401).json({msg:'User is unauthenticated',value:false});
 });
+
 
 
 
