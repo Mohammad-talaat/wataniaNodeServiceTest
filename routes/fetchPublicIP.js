@@ -30,7 +30,7 @@ router.get('/checkUserUsingDNS',(req,res)=>{
 
 
 router.get('/checkUserIPUsingIPs', (req, res) => {
-    let publicIPs = ['105.37.128.108',"105.34.11.64"];
+    let publicIPs = ['105.37.128.108', '105.34.11.64', '162.158.22.204', '10.210.119.101'];
     let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
     if (ip.substr(0, 7) == "::ffff:") {
         ip = ip.substr(7);
