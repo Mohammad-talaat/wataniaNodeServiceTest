@@ -46,7 +46,7 @@ router.get('/checkUserUsingDNS',(req,res)=>{
 
 
 router.get('/checkUserIPUsingIPs', (req, res) => {
-    let publicIPs = ['105.37.128.108', '105.34.11.64', '162.158.22.204', '10.210.119.101',"105.194.75.206"];
+    let publicIPs = ["82.201.223.234"];
     let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
     // If x-forwarded-for has multiple IP addresses, it's a comma-separated string
@@ -61,6 +61,7 @@ router.get('/checkUserIPUsingIPs', (req, res) => {
             // The IP is in the list of public IPs
             return res.status(200).json({msg:'User is authenticated',value:true,ip});
         }
+        
     }
 
     // No IP address was in the list of public IPs
