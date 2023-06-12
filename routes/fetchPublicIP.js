@@ -4,8 +4,10 @@ const dns = require('dns')
 
 router.get('/fetch-public-ip', (req, res) => {
     let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    console.log(ip[0])
     if (ip.substr(0, 7) == "::ffff:") {
         ip = ip.substr(7)
+        console.log(ip)
     }
         res.send({ip});
 });
