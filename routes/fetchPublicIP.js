@@ -1,75 +1,25 @@
-const express = require('express');
-const router = express.Router();
-const dns = require('dns')
+require("dotenv").config();
 
-router.get('/fetch-public-ip', (req, res) => {
-    let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-    console.log(ip[0])
-    if (ip.substr(0, 7) == "::ffff:") {
-        ip = ip.substr(7)
-        console.log(ip)
-    }
-        res.send({ip});
+var cors = require("cors");
+const express = require("express");
+
+const app = express();
+app.set("trust proxy", "loopback");
+app.use(express.json());
+app.use(cors());
+
+//Here we are configuring express to use body-parser as middle-ware.
+
+//initialize
+const port = 4000;
+
+app.use("/api", require("./routes/api"));
+app.use("/attendance-ip", require("./routes/fetchPublicIP"));
+app.use("/", (req, res) => {
+  res.send(`server is working on port ${port}`);
 });
 
-router.get('/fetch-public-ip-v2', (req, res) => {
-    let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-
-    // If there are multiple IP addresses in x-forwarded-for, the first one is the original IP address
-    if (ip.indexOf(',') > -1) {
-        ip = ip.split(',')[0].trim();
-    }
-
-    if (ip.substr(0, 7) == "::ffff:") {
-        ip = ip.substr(7)
-    }
-    res.send({ip});
-});
-
-
-router.get('/checkUserUsingDNS',(req,res)=>{
-    let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-    if (ip.substr(0, 7) == "::ffff:") {
-        ip = ip.substr(7)
-    }
-    dns.lookup('wic-fc-fortiddns.com', (err, address, family) => {
-        console.log('address: %j family: IPv%s', address, family);
-        if(address == ip){
-            return res.status(200).json({msg:'User is authenticated',value:true})
-        }
-        else if(address !== ip){
-            return res.status(401).json({msg:'User is unauthenticated',value:false})
-        }
-    });
-    res.status(400).json({msg:'Request Failed. Please try again!'});
-})
-
-
-router.get('/checkUserIPUsingIPs', (req, res) => {
-    let publicIPs = ["82.201.223.234"];
-    let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-
-    // If x-forwarded-for has multiple IP addresses, it's a comma-separated string
-    let ips = ip.split(',');
-
-    // Trim whitespace from each IP address
-    ips = ips.map(ip => ip.trim());
-
-    // Check if any of the IPs in the x-forwarded-for header is in publicIPs
-    for(let ip of ips) {
-        if (publicIPs.includes(ip)) {
-            // The IP is in the list of public IPs
-            return res.status(200).json({msg:'User is authenticated',value:true,ip});
-        }
-        
-    }
-
-    // No IP address was in the list of public IPs
-    res.status(401).json({msg:'User is unauthenticated',value:false});
-});
-
-
-
-
-
-module.exports = router;
+//listen for requests
+app.listen(process.env.port || port, () =>
+  console.log(`server start on port ${port}`)
+);
